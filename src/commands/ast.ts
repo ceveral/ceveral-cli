@@ -76,6 +76,11 @@ export function commands(cmd: ICommand) {
         .action((files) => {
             action(astCmd, files)
             .catch( e => {
+                if (e.errors) {
+                    return e.errors.forEach( e => {
+                        console.log(e)
+                    })
+                }
                 console.error(e.message)
             })
         });

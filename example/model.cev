@@ -1,5 +1,7 @@
 package main;
 
+import "./import";
+
 enum Gender {
     Male = "male";
     Female = "female";
