@@ -1,6 +1,7 @@
 
 import {ICommand} from 'commander'
-import {Repository} from 'ceveral-compiler'
+import {Repository} from 'ceveral-compiler/lib/repository';
+
 import * as chalk from 'chalk';
 export async function list(cmd:ICommand) {
     let repo = new Repository();
@@ -26,8 +27,7 @@ export async function list(cmd:ICommand) {
 export function commands(cmd:ICommand) {
 
     let listCmd = cmd.command('list')
-   
-    //.arguments('<files...>')
+    .description('List installed generators')
     .action( () => {
         list(listCmd)
     })

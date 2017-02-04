@@ -8,15 +8,19 @@ const ms = require('ms');
 
 async function transform(cmd: ICommand, files: string[]) {
     let elapsed = utils.time();
-    let q: string[] = cmd['transforms'];
+    let q: string[] = cmd['transformer'];
+    
+    if (!q) throw new Error('You must specify at least one transformer');
+
+
     let quiet = !!cmd['quiet'];
 
     let cev = new Ceveral();
 
     await cev.setup();
-
+    
     let input = await utils.readFiles(files)
-
+    
     let results: IResult[] = [];
     for (let file of input) {
         let tmp = await cev.transform(file.contents.toString(), {
@@ -52,9 +56,9 @@ function collect(val, memo) {
 export function commands(cmd: ICommand) {
 
     let transformCmd = cmd
-        .option('-t, --transforms <string>', 'transformer', collect, [])
-        .option('-q, --quit')
-        .option('-o, --output <string>')
+        .option('-t, --transformer <string>', 'Transformers to use', collect, [])
+        .option('-q, --quiet', 'Suppress output')
+        .option('-o, --output <string>', 'Output directory')
         .arguments('<files...>')
         .action(files => {
             transform(transformCmd, files).catch(e => {

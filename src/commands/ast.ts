@@ -68,6 +68,7 @@ async function action(cmd: ICommand, files: string[]) {
 export function commands(cmd: ICommand) {
 
     let astCmd = cmd.command('ast')
+        .description("Generate ast")
         .arguments('<file...>')
         .option("-o, --output <path>", "output to file instead of stdout")
         .option("-c --concat", "concat resulting asts to one file")
