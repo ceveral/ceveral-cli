@@ -11,7 +11,7 @@ export async function list(cmd:ICommand) {
         console.log(`It looks like you don't have any transformers installed yet.\n`);
         return;
     }
-    console.log('Ceveral transformers:')
+    console.log('Available transformers:\n')
     for (let key in repo.transformers) {
         let trans = repo.transformers[key];
         console.log("  %s (%s)", chalk.bold(trans.name), key);
@@ -27,7 +27,7 @@ export async function list(cmd:ICommand) {
 export function commands(cmd:ICommand) {
 
     let listCmd = cmd.command('list')
-    .description('List installed generators')
+    .description('Print available transformers')
     .action( () => {
         list(listCmd)
     })
