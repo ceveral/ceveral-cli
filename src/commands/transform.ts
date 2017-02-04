@@ -62,7 +62,7 @@ export function commands(cmd: ICommand) {
         .arguments('<files...>')
         .action(files => {
             transform(transformCmd, files).catch(e => {
-                console.error(e.errors);
+                console.error(e);
             })
         })
 

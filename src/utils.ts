@@ -23,6 +23,7 @@ export function resultsToVinyl(results:IResult[], path:string = null) {
 
 export function readFiles(files: string[], options?:vinyl.ISrcOptions) {
     return new Promise<File[]>((resolve, reject) => {
+        
         vinyl.src(files, options)
             .on('error', reject)
             .pipe(es.writeArray((err, result) => {
