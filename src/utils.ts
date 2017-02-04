@@ -2,6 +2,24 @@ import * as vinyl from 'vinyl-fs'
 import * as es from 'event-stream';
 import * as File from 'vinyl'
 import * as fs from 'mz/fs';
+import * as Path from 'path';
+import {IResult} from 'ceveral-compiler';
+
+export function resultsToVinyl(results:IResult[], path:string = null) {
+    let outFiles: File[] = [];
+
+    for (let o of results) {
+        
+        let file = new File({
+            cwd: process.cwd(),
+            base: path,
+            path: Path.join(path||"", o.filename),
+            contents: o.buffer
+        });
+        outFiles.push(file);
+    }
+    return outFiles;
+}
 
 export function readFiles(files: string[], options?:vinyl.ISrcOptions) {
     return new Promise<File[]>((resolve, reject) => {
@@ -44,3 +62,4 @@ export function time() {
         return future.getTime() - now.getTime();
     }
 }
+

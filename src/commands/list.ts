@@ -1,12 +1,24 @@
 
 import {ICommand} from 'commander'
-import {Repository} from '../repository'
-
-export function list(cmd:ICommand) {
+import {Repository} from 'ceveral-compiler'
+import * as chalk from 'chalk';
+export async function list(cmd:ICommand) {
     let repo = new Repository();
 
-    repo.loadTransformers();
-
+    await repo.loadTransformers();
+    if (!Object.keys(repo.transformers).length) {
+        console.log(`It looks like you don't have any transformers installed yet.\n`);
+        return;
+    }
+    console.log('Ceveral transformers:')
+    for (let key in repo.transformers) {
+        let trans = repo.transformers[key];
+        console.log("  %s (%s)", chalk.bold(trans.name), key);
+        if (trans.description) {
+            console.log('  %s', trans.description)
+        }
+    }
+    console.log('')
     
 
 }

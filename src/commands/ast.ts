@@ -1,12 +1,11 @@
 
 import { ICommand } from 'commander'
-import { Transpiler, Result } from 'ceveral-compiler';
+import { Transpiler, IResult } from 'ceveral-compiler';
 import * as fs from 'mz/fs'
 import * as Path from 'path';
 import * as utils from '../utils'
 import * as File from 'vinyl';
 import * as chalk from 'chalk';
-import * as ms from 'ms';
 
 async function action(cmd: ICommand, files: string[]) {
     let elapsed = utils.time();

@@ -1,43 +1,47 @@
 
 import { ICommand } from 'commander'
-import { Repository } from '../repository';
+//import { Repository, getAnnotationValidations } from '../repository';
 import * as chalk from 'chalk';
 import * as utils from '../utils';
-import { Transpiler, Result } from 'ceveral-compiler'
-
+import { IResult, Ceveral } from 'ceveral-compiler'
+const ms = require('ms');
 
 async function transform(cmd: ICommand, files: string[]) {
+    let elapsed = utils.time();
     let q: string[] = cmd['transforms'];
+    let quiet = !!cmd['quiet'];
 
-    let repo = new Repository();
-    await repo.loadTransformers();
+    let cev = new Ceveral();
 
-    let notfound: string[] = [];
-    let transformers = q.map(t => {
-        return repo.getTransformer(t);
-    }).filter((m, i) => {
-        if (m == null) {
-            notfound.push(q[i]);
-            return false;
-        }
-        return true;
-    });
+    await cev.setup();
 
-    if (notfound.length) {
-        console.log('Could not find template: %s', chalk.bold(notfound.join(', ')));
-        return;
-    }
-    let transpiler = new Transpiler();
     let input = await utils.readFiles(files)
 
-    let output: Result[] = [];
+    let results: IResult[] = [];
     for (let file of input) {
-        for (let transformer of transformers) {
-            let files = await transpiler.transpile(file.contents.toString(), transformer);
-            output.push(...files);
-        }
+        let tmp = await cev.transform(file.contents.toString(), {
+            transformers: q,
+            fileName: file.path
+        });
+        results.push(...tmp);
     }
-    console.log(output)
+
+    let output = cmd["output"] || ""
+
+    if (!output) {
+        return results.forEach((m) => console.log(m.buffer.toString()));
+    }
+    
+    let vinyl = utils.resultsToVinyl(results);
+
+    await utils.ensureOutDir(output);
+    if (!quiet) console.log('Write ast to path: %s', chalk.cyan(output));
+    utils.writeFiles(output, vinyl, (file) => {
+        console.log('  create %s', chalk.green(file.path));
+    }).then(() => {
+        console.log('Files written in %s\n', chalk.cyan(ms(elapsed())));
+    })
+    
 }
 
 function collect(val, memo) {
@@ -49,10 +53,12 @@ export function commands(cmd: ICommand) {
 
     let transformCmd = cmd
         .option('-t, --transforms <string>', 'transformer', collect, [])
+        .option('-q, --quit')
+        .option('-o, --output <string>')
         .arguments('<files...>')
         .action(files => {
-            transform(transformCmd, files).catch( e => {
-                console.log(e)
+            transform(transformCmd, files).catch(e => {
+                console.error(e);
             })
         })
 
