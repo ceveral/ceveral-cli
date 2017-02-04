@@ -5,6 +5,11 @@ enum Gender {
     Female = "female";
 }
 
+enum Role {
+    Admin;
+    User;
+}
+
 record Person {
     name: string;
     age: int;
