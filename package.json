@@ -14,7 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/ms": "^0.7.29",
-    "ceveral-compiler": "github:ceveral/ceveral-compiler#dev",
+    "ceveral-compiler": "github:ceveral/ceveral-compiler",
     "chalk": "^1.1.3",
     "commander": "^2.9.0",
     "debug": "^2.6.0",
