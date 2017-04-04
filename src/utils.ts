@@ -65,3 +65,31 @@ export function time() {
     }
 }
 
+
+export function strlen(str:string){
+  var code = /\u001b\[(?:\d*;){0,5}\d*m/g;
+  var stripped = ("" + (str != null ? str : '')).replace(code,'');
+  var split = stripped.split("\n");
+  return split.reduce(function (memo, s) { return (s.length > memo) ? s.length : memo }, 0);
+}
+
+export function pad(str:string, len:number, pad:string, dir?:string) {
+  if (len + 1 >= str.length)
+    switch (dir){
+      case 'left':
+        str = Array(len + 1 - str.length).join(pad) + str;
+        break;
+
+      case 'both':
+        let padlen;
+        var right = Math.ceil((padlen = len - str.length) / 2);
+        var left = padlen - right;
+        str = Array(left + 1).join(pad) + str + Array(right + 1).join(pad);
+        break;
+
+      default:
+        str = str + Array(len + 1 - str.length).join(pad);
+    };
+
+  return str;
+};
