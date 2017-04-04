@@ -15,4 +15,6 @@ enum Role {
 record Person {
     name: string;
     age: int;
+    role: Role
+    gender: Gender;
 }

@@ -5,11 +5,14 @@ import * as chalk from 'chalk';
 import * as utils from '../utils';
 import { IResult, Ceveral } from 'ceveral-compiler'
 const ms = require('ms');
+const listr = require('listr');
 
-async function transform(cmd: ICommand, files: string[]) {
+import { Observable } from 'rxjs'
+
+function transform2(cmd: ICommand, files: string[]) {
     let elapsed = utils.time();
     let q: string[] = cmd['transformer'];
-    
+
     if (!q) throw new Error('You must specify at least one transformer');
 
 
@@ -17,10 +20,46 @@ async function transform(cmd: ICommand, files: string[]) {
 
     let cev = new Ceveral();
 
-    await cev.setup();
-    
+    let tasks = [{
+        title: "Transform",
+        task: ctx => {
+            return new Observable<void>(<any>(async (observer) => {
+
+                ctx.files = await utils.readFiles(files)
+                let results: IResult[] = [];
+                for (let file of ctx.files) {
+                    observer.next(file);
+                    let tmp = await cev.transform(file.contents.toString(), {
+                        transformers: q,
+                        fileName: file.path
+                    });
+                    results.push(...tmp);
+                }
+                observer.complete();
+            }))
+
+        }
+    }]
+
+    let task = new listr(tasks);
+
+    return task.run()
+}
+
+
+async function transform(cmd: ICommand, files: string[]) {
+    let elapsed = utils.time();
+    let q: string[] = cmd['transformer'];
+
+    if (!q) throw new Error('You must specify at least one transformer');
+
+
+    let quiet = !!cmd['quiet'];
+
+    let cev = new Ceveral();
+
     let input = await utils.readFiles(files)
-    
+
     let results: IResult[] = [];
     for (let file of input) {
         let tmp = await cev.transform(file.contents.toString(), {
@@ -35,17 +74,17 @@ async function transform(cmd: ICommand, files: string[]) {
     if (!output) {
         return results.forEach((m) => console.log(m.buffer.toString()));
     }
-    
+
     let vinyl = utils.resultsToVinyl(results);
 
     await utils.ensureOutDir(output);
-    if (!quiet) console.log('Write ast to path: %s', chalk.cyan(output));
+    if (!quiet) console.log('Write to path: %s', chalk.cyan(output));
     utils.writeFiles(output, vinyl, (file) => {
         console.log('  create %s', chalk.green(file.path));
     }).then(() => {
         console.log('Files written in %s\n', chalk.cyan(ms(elapsed())));
     })
-    
+
 }
 
 function collect(val, memo) {
@@ -62,7 +101,7 @@ export function commands(cmd: ICommand) {
         .arguments('<files...>')
         .action(files => {
             transform(transformCmd, files).catch(e => {
-                console.error(e);
+                console.error(e.message);
             })
         })
 
